@@ -4,7 +4,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { sql } from "@vercel/postgres";
+import { sql } from "../../../lib/db";
 
 export async function GET(request) {
   try {
