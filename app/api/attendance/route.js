@@ -2,6 +2,8 @@
 // Returns attendance records joined with student names, for the dashboard.
 // Optional ?date=YYYY-MM-DD query param filters to one day.
 
+export const dynamic = "force-dynamic";
+
 import { sql } from "@vercel/postgres";
 
 export async function GET(request) {
