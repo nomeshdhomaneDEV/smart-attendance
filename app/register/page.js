@@ -24,7 +24,17 @@ export default function RegisterPage() {
       } catch {
         stream = await navigator.mediaDevices.getUserMedia({ video: true });
       }
-      if (videoRef.current) videoRef.current.srcObject = stream;
+      if (videoRef.current) {
+        const video = videoRef.current;
+        video.srcObject = stream;
+        await new Promise((resolve) => {
+          if (video.readyState >= 2 && video.videoWidth > 0) {
+            resolve();
+          } else {
+            video.addEventListener("loadeddata", resolve, { once: true });
+          }
+        });
+      }
       setStatus({ type: "ok", text: "Camera ready. Position your face and submit." });
       setReady(true);
     }
