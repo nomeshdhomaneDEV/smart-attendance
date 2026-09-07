@@ -3,7 +3,7 @@
 // (a list of 128 numbers that uniquely represents their face, computed
 // in the browser by face-api.js) and saves it to the database.
 
-import { sql } from "../../../lib/db";
+import { sql } from "@vercel/postgres";
 
 export async function POST(request) {
   try {

@@ -2,7 +2,7 @@
 // Returns all registered students (used by the attendance page to match
 // against, and by the dashboard to show who's enrolled).
 
-import { sql } from "../../../lib/db";
+import { sql } from "@vercel/postgres";
 
 export async function GET() {
   try {

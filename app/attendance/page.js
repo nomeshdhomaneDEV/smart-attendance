@@ -44,47 +44,52 @@ export default function AttendancePage() {
     setMatched(null);
     setStatus({ type: "pending", text: "Scanning..." });
 
-    const descriptor = await getFaceDescriptor(videoRef.current);
-    if (!descriptor) {
-      setStatus({ type: "err", text: "No face detected. Try again." });
-      return;
-    }
-
-    if (students.length === 0) {
-      setStatus({ type: "err", text: "No students registered yet." });
-      return;
-    }
-
-    // Compare against every registered student, keep the closest match
-    let best = null;
-    let bestDistance = Infinity;
-    for (const student of students) {
-      const distance = euclideanDistance(descriptor, student.descriptor);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = student;
+    try {
+      const descriptor = await getFaceDescriptor(videoRef.current);
+      if (!descriptor) {
+        setStatus({ type: "err", text: "No face detected. Center your full face in frame and try again." });
+        return;
       }
+
+      if (students.length === 0) {
+        setStatus({ type: "err", text: "No students registered yet." });
+        return;
+      }
+
+      // Compare against every registered student, keep the closest match
+      let best = null;
+      let bestDistance = Infinity;
+      for (const student of students) {
+        const distance = euclideanDistance(descriptor, student.descriptor);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = student;
+        }
+      }
+
+      if (!best || bestDistance > MATCH_THRESHOLD) {
+        setStatus({ type: "err", text: "Face not recognized. Are they registered?" });
+        return;
+      }
+
+      const res = await fetch("/api/mark-attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: best.student_id }),
+      });
+      const data = await res.json();
+
+      setMatched(best);
+      setStatus({
+        type: "ok",
+        text: data.alreadyMarked
+          ? `${best.name} already marked present today.`
+          : `${best.name} marked present.`,
+      });
+    } catch (err) {
+      console.error("Scan error:", err);
+      setStatus({ type: "err", text: "Something went wrong. Please try again." });
     }
-
-    if (!best || bestDistance > MATCH_THRESHOLD) {
-      setStatus({ type: "err", text: "Face not recognized. Are they registered?" });
-      return;
-    }
-
-    const res = await fetch("/api/mark-attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ studentId: best.student_id }),
-    });
-    const data = await res.json();
-
-    setMatched(best);
-    setStatus({
-      type: "ok",
-      text: data.alreadyMarked
-        ? `${best.name} already marked present today.`
-        : `${best.name} marked present.`,
-    });
   }
 
   return (

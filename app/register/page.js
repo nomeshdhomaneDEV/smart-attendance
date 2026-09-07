@@ -41,28 +41,33 @@ export default function RegisterPage() {
       return;
     }
 
-    setStatus({ type: "pending", text: "Detecting face..." });
-    const descriptor = await getFaceDescriptor(videoRef.current);
+    try {
+      setStatus({ type: "pending", text: "Detecting face..." });
+      const descriptor = await getFaceDescriptor(videoRef.current);
 
-    if (!descriptor) {
-      setStatus({ type: "err", text: "No face detected. Try better lighting and face the camera directly." });
-      return;
-    }
+      if (!descriptor) {
+        setStatus({ type: "err", text: "No face detected. Center your full face in frame, ensure good lighting, and try again." });
+        return;
+      }
 
-    setStatus({ type: "pending", text: "Saving..." });
-    const res = await fetch("/api/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, rollNumber, descriptor }),
-    });
-    const data = await res.json();
+      setStatus({ type: "pending", text: "Saving..." });
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, rollNumber, descriptor }),
+      });
+      const data = await res.json();
 
-    if (data.success) {
-      setStatus({ type: "ok", text: `Registered ${data.student.name} successfully.` });
-      setName("");
-      setRollNumber("");
-    } else {
-      setStatus({ type: "err", text: data.error || "Registration failed." });
+      if (data.success) {
+        setStatus({ type: "ok", text: `Registered ${data.student.name} successfully.` });
+        setName("");
+        setRollNumber("");
+      } else {
+        setStatus({ type: "err", text: data.error || "Registration failed." });
+      }
+    } catch (err) {
+      console.error("Register submit error:", err);
+      setStatus({ type: "err", text: "Something went wrong. Please try again." });
     }
   }
 
