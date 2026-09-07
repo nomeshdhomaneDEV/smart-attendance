@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { loadModels, getFaceDescriptor, euclideanDistance } from "../../lib/loadModels";
+import {
+  loadModels,
+  getFaceDescriptor,
+  euclideanDistance,
+  isValidDescriptor,
+} from "../../lib/loadModels";
 
 const MATCH_THRESHOLD = 0.5;
 
@@ -19,7 +24,11 @@ export default function AttendancePage() {
 
       const res = await fetch("/api/students");
       const data = await res.json();
-      setStudents(data.students || []);
+      const registeredStudents = Array.isArray(data.students) ? data.students : [];
+      const validStudents = registeredStudents.filter((student) =>
+        isValidDescriptor(student.descriptor)
+      );
+      setStudents(validStudents);
 
       let stream;
       try {
@@ -52,7 +61,10 @@ export default function AttendancePage() {
       }
 
       if (students.length === 0) {
-        setStatus({ type: "err", text: "No students registered yet." });
+        setStatus({
+          type: "err",
+          text: "No valid student face data found. Register the student again.",
+        });
         return;
       }
 

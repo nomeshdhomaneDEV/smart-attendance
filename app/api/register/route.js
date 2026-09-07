@@ -9,7 +9,13 @@ export async function POST(request) {
   try {
     const { name, rollNumber, descriptor } = await request.json();
 
-    if (!name || !rollNumber || !descriptor) {
+    if (
+      !name ||
+      !rollNumber ||
+      !Array.isArray(descriptor) ||
+      descriptor.length !== 128 ||
+      !descriptor.every((value) => Number.isFinite(value))
+    ) {
       return Response.json({ error: "Missing name, rollNumber, or face data" }, { status: 400 });
     }
 
