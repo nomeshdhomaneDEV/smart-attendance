@@ -5,7 +5,7 @@
 // This route just records that the student was present today,
 // and prevents marking the same student twice in one day.
 
-import { sql } from "@vercel/postgres";
+import { sql } from "../../../lib/db";
 
 export async function POST(request) {
   try {

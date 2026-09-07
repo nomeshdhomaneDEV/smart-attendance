@@ -2,7 +2,7 @@
 // Visit this URL ONCE after deploying (e.g. yoursite.vercel.app/api/init-db)
 // to create the database tables. Safe to visit again — it won't duplicate data.
 
-import { sql } from "@vercel/postgres";
+import { sql } from "../../../lib/db";
 
 export async function GET() {
   try {
